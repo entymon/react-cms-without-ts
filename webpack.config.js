@@ -33,13 +33,13 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.ProvidePlugin({
-      jQuery: 'jquery',
-      $: 'jquery',
-      jquery: 'jquery',
-      Tether: 'tether',
-    })
+    new webpack.HotModuleReplacementPlugin()
+    // new webpack.ProvidePlugin({
+    //   jQuery: 'jquery',
+    //   $: 'jquery',
+    //   jquery: 'jquery',
+    //   Tether: 'tether',
+    // })
   ],
   devServer: {
     contentBase: './dist',
