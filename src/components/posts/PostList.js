@@ -19,7 +19,7 @@ export default class PostList extends React.Component {
     postUuid: '',
     selectedPost: {},
     posts: [],
-    postDescr: '',
+    postDesc: '',
     postTitle: '',
     post: {
       title: '',
@@ -80,36 +80,37 @@ export default class PostList extends React.Component {
     });
   }
 
-  updatePost (data) {
+  updatePost = (data) => {
     this.newPost.title = this.state.postTitle;
     this.newPost.description = this.state.postDescr;
 
   }
 
-  savePost(data) {
+  /**
+   * Save post
+   * @param data
+   */
+  savePost = (data) => {
 
-    const domTitle = document.getElementById('js-title-input').value;
-    const domDesc = document.getElementById('js-descr-input').value;
+    data.title = this.state.postTitle;
+    data.description = this.state.postDesc;
 
-    data.title = domTitle;
-    data.description = domDesc;
+    console.log(data, 'aswqe');
 
-    console.log(data);
-
-    // fetch(`http://localhost:4000/posts`, {
-    //   method  : 'post',
-    //   headers : new Headers({
-    //     'Content-Type': 'application/json'
-    //   }),
-    //   body    : JSON.stringify(data)
-    // }).then( response => {
-    //   return response.json();
-    // }).then( result => {
-    //   this.getPosts();
-    //   this.onCloseAlertModal();
-    //   console.log(result, 'resource deleted');
-    // });
-  }
+    fetch(`http://localhost:4000/posts`, {
+      method  : 'post',
+      headers : new Headers({
+        'Content-Type': 'application/json'
+      }),
+      body    : data
+    }).then( response => {
+      return response.json();
+    }).then( result => {
+      this.getPosts();
+      this.onCloseAlertModal();
+      console.log(result, 'resource deleted');
+    });
+  };
 
   /**
    * Render record on list
@@ -154,7 +155,7 @@ export default class PostList extends React.Component {
   };
 
   onChangeDesc = (event) => {
-    this.setState({postDescr: event.target.value});
+    this.setState({postDesc: event.target.value});
   };
 
 
@@ -182,7 +183,7 @@ export default class PostList extends React.Component {
         <h2>{title}</h2>
 
         <div className="form-group">
-          <label for="title">Title</label>
+          <label>Title</label>
           <input type="text" className="form-control" id="js-title-input"
                  placeholder="title" value={this.state.postTitle}
                  onChange={this.onChangeTitle}
@@ -190,10 +191,10 @@ export default class PostList extends React.Component {
         </div>
 
         <div className="form-group">
-          <label for="desc">Description</label>
+          <label>Description</label>
           <input type="text" className="form-control" id="js-desc-input"
                  placeholder="description"
-                 value={this.state.postDescr}
+                 value={this.state.postDesc}
                  onChange={this.onChangeDesc}
           />
         </div>
