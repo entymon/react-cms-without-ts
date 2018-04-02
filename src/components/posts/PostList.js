@@ -1,13 +1,34 @@
 import React from 'react';
-import {Grid, ButtonGroup, Table, Button, Glyphicon} from 'react-bootstrap';
+import {Grid, ButtonGroup, Table, Button, Glyphicon, FormGroup, FormControl, ControlLabel} from 'react-bootstrap';
 import Modal from 'react-responsive-modal';
 
 export default class PostList extends React.Component {
 
+  newPost = {
+    title: '',
+    description: '',
+    author: {
+      firstName: 'Admin',
+      lastName: 'Non Authorised'
+    }
+  };
+
   state = {
     openAlert: false,
+    openForm: false,
     postUuid: '',
-    posts: []
+    selectedPost: {},
+    posts: [],
+    postDescr: '',
+    postTitle: '',
+    post: {
+      title: '',
+      description: '',
+      author: {
+        firstName: 'Admin',
+        lastName: 'Non Authorised'
+      }
+    }
   };
 
   onOpenAlertModal = (uuid) => {
@@ -19,6 +40,17 @@ export default class PostList extends React.Component {
 
   onCloseAlertModal = () => {
     this.setState({openAlert: false});
+  };
+
+  onOpenFormModal = (post) => {
+    this.setState({
+      openForm: true,
+      selectedPost: post
+    });
+  };
+
+  onCloseFormModal = () => {
+    this.setState({openForm: false});
   };
 
   getPosts = () => {
@@ -33,6 +65,9 @@ export default class PostList extends React.Component {
     this.getPosts();
   };
 
+  /**
+   * Remove element
+   */
   removePost () {
     fetch(`http://localhost:4000/posts/${this.state.postUuid}`, {
       method  : 'delete'
@@ -45,6 +80,43 @@ export default class PostList extends React.Component {
     });
   }
 
+  updatePost (data) {
+    this.newPost.title = this.state.postTitle;
+    this.newPost.description = this.state.postDescr;
+
+  }
+
+  savePost(data) {
+
+    const domTitle = document.getElementById('js-title-input').value;
+    const domDesc = document.getElementById('js-descr-input').value;
+
+    data.title = domTitle;
+    data.description = domDesc;
+
+    console.log(data);
+
+    // fetch(`http://localhost:4000/posts`, {
+    //   method  : 'post',
+    //   headers : new Headers({
+    //     'Content-Type': 'application/json'
+    //   }),
+    //   body    : JSON.stringify(data)
+    // }).then( response => {
+    //   return response.json();
+    // }).then( result => {
+    //   this.getPosts();
+    //   this.onCloseAlertModal();
+    //   console.log(result, 'resource deleted');
+    // });
+  }
+
+  /**
+   * Render record on list
+   * @param post
+   * @param index
+   * @returns {*}
+   */
   renderRecord = (post, index) => {
     if (post !== null) {
       return (
@@ -58,6 +130,7 @@ export default class PostList extends React.Component {
               <Button
                 className={'btn post-list__button--padding'}
                 style={{border: '1px solid grey', cursor: 'pointer'}}
+                onClick={() => this.onOpenFormModal(post)}
               >
                 <Glyphicon glyph="pencil"/>Edit
               </Button>
@@ -76,6 +149,79 @@ export default class PostList extends React.Component {
     }
   };
 
+  onChangeTitle = (event) => {
+    this.setState({postTitle: event.target.value});
+  };
+
+  onChangeDesc = (event) => {
+    this.setState({postDescr: event.target.value});
+  };
+
+
+  /**
+   * Renders FORM modal
+   * @param openForm
+   * @returns {*}
+   */
+  renderFormModal(openForm) {
+
+    let post = this.newPost;
+    let title = 'Add new Post';
+    let buttonDesc = 'Add';
+    let action = this.savePost;
+
+    if (this.state.selectedPost) {
+      post = this.state.selectedPost;
+      title = 'Update Post';
+      buttonDesc = 'Update';
+      action = this.updatePost;
+    }
+
+    return (
+      <Modal open={openForm} onClose={this.onCloseFormModal}>
+        <h2>{title}</h2>
+
+        <div className="form-group">
+          <label for="title">Title</label>
+          <input type="text" className="form-control" id="js-title-input"
+                 placeholder="title" value={this.state.postTitle}
+                 onChange={this.onChangeTitle}
+          />
+        </div>
+
+        <div className="form-group">
+          <label for="desc">Description</label>
+          <input type="text" className="form-control" id="js-desc-input"
+                 placeholder="description"
+                 value={this.state.postDescr}
+                 onChange={this.onChangeDesc}
+          />
+        </div>
+
+        <Button
+          className={'btn post-list__button--padding'}
+          style={{border: '1px solid grey', cursor: 'pointer'}}
+          onClick={() => this.onCloseFormModal()}
+        >
+          <Glyphicon glyph="pencil"/>No
+        </Button>
+
+        <Button
+          className={'btn btn-primary post-list__button--padding'}
+          style={{border: '1px solid grey', cursor: 'pointer'}}
+          onClick={() => action(post)}
+        >
+          <Glyphicon glyph="cross"/>{buttonDesc}
+        </Button>
+      </Modal>
+    );
+  }
+
+  /**
+   * Renders ALERT modal
+   * @param openAlert
+   * @returns {*}
+   */
   renderAlertModal(openAlert) {
     return (
       <Modal open={openAlert} onClose={this.onCloseAlertModal} little>
@@ -100,19 +246,28 @@ export default class PostList extends React.Component {
     );
   }
 
+  /**
+   * Default render
+   * @returns {*}
+   */
   render() {
-    const {openAlert} = this.state;
+    const {openAlert, openForm} = this.state;
     return (
 
       <div>
         {this.renderAlertModal(openAlert)}
+        {this.renderFormModal(openForm)}
         <Grid className={'bsClass'}>
 
-          <Button className={'btn post-list__button--padding'} style={{
-            border: '1px solid grey',
-            margin: '10px',
-            cursor: 'pointer'
-          }}>
+          <Button
+            className={'btn post-list__button--padding'}
+            onClick={() => this.onOpenFormModal()}
+            style={{
+              border: '1px solid grey',
+              margin: '10px',
+              cursor: 'pointer'
+            }}
+          >
             <Glyphicon glyph="pencil"/>Add new
           </Button>
 
